@@ -4,251 +4,48 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AACPD — Associação Angolana dos Canais e Plataformas Digitais</title>
-<meta name="description" content="AACPD — Associação Angolana dos Canais e Plataformas Digitais. Representa e une canais, plataformas digitais, influenciadores e criadores de conteúdo em Angola.">
+<meta name="description" content="AACPD — Associação Angolana dos Canais e Plataformas Digitais. Adesão online, quotas, benefícios para membros, notícias e notas de imprensa.">
 <meta name="theme-color" content="#d71920">
 <meta property="og:title" content="AACPD — Associação Angolana dos Canais e Plataformas Digitais">
-<meta property="og:description" content="Unir, representar e fortalecer o ecossistema digital angolano.">
+<meta property="og:description" content="Unir, representar e valorizar o ecossistema digital angolano.">
 <meta property="og:image" content="img/logo-aacpd.jpg">
 <link rel="icon" href="img/logo-aacpd.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
-<style>
-:root {
-  --red: #d71920; --red-d: #a90f15; --yellow: #f5b400; --pink: #ef3b4a; --blue: #1f6bff;
-  --ink: #101418; --text: #2a3038; --muted: #66707c; --bg: #ffffff; --soft: #f4f5f7; --line: #e3e6ea; --card: #ffffff;
-  --dark: #0f1b1f; --sans: "DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --ink: #f3f5f7; --text: #d7dce2; --muted: #9aa4af; --bg: #0c1013; --soft: #151b20; --line: #26303a; --card: #141a1f; --red: #ff3b42; --red-d: #ff6a70; }
-}
-:root[data-theme="dark"] { --ink: #f3f5f7; --text: #d7dce2; --muted: #9aa4af; --bg: #0c1013; --soft: #151b20; --line: #26303a; --card: #141a1f; --red: #ff3b42; --red-d: #ff6a70; }
-*, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 76px; -webkit-text-size-adjust: 100%; }
-body { margin: 0; font: 400 16px/1.65 var(--sans); color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-img { display: block; max-width: 100%; }
-a { color: inherit; }
-h1, h2, h3 { color: var(--ink); line-height: 1.15; margin: 0 0 .5em; letter-spacing: -.02em; }
-h1 { font-size: clamp(2rem, 5.4vw, 3.6rem); font-weight: 800; }
-h2 { font-size: clamp(1.6rem, 3.4vw, 2.4rem); font-weight: 800; }
-h3 { font-size: 1.05rem; font-weight: 700; }
-p { margin: 0 0 1em; }
-:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; border-radius: 6px; }
-.wrap { width: min(1160px, 100% - 32px); margin-inline: auto; }
-.dots { display: inline-flex; gap: 8px; }
-.dots i { width: 12px; height: 12px; border-radius: 50%; display: block; }
-.dots i:nth-child(1) { background: var(--yellow); } .dots i:nth-child(2) { background: var(--pink); } .dots i:nth-child(3) { background: var(--blue); }
-.bar { height: 5px; background: linear-gradient(90deg, var(--yellow) 0 33.3%, var(--pink) 33.3% 66.6%, var(--blue) 66.6%); }
-.kicker { font-weight: 700; font-size: .78rem; letter-spacing: .16em; text-transform: uppercase; color: var(--red); display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 22px; border-radius: 10px; font-weight: 700; text-decoration: none; border: 2px solid transparent; background: var(--red); color: #fff; cursor: pointer; font: inherit; font-weight: 700; }
-.btn:hover { background: var(--red-d); }
-.btn--line { background: transparent; color: var(--ink); border-color: var(--line); }
-.btn--line:hover { background: var(--soft); }
-.btns { display: flex; gap: 12px; flex-wrap: wrap; }
-
-/* topo */
-.top { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
-.top__in { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 68px; }
-.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 800; color: var(--red); font-size: 1.35rem; letter-spacing: -.01em; }
-.brand img { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; object-position: 20% 50%; background: #fff; }
-.nav { display: flex; gap: 4px; }
-.nav a { text-decoration: none; padding: 8px 12px; border-radius: 8px; font-weight: 500; font-size: .95rem; }
-.nav a:hover { background: var(--soft); }
-.nav .btn { padding: 9px 16px; margin-left: 6px; }
-.menu-btn { display: none; border: 0; background: none; width: 44px; height: 44px; border-radius: 10px; cursor: pointer; color: var(--ink); }
-@media (max-width: 860px) {
-  .menu-btn { display: grid; place-items: center; }
-  .nav { display: none; position: absolute; left: 0; right: 0; top: 68px; background: var(--bg); border-bottom: 1px solid var(--line); flex-direction: column; padding: 10px 16px 16px; }
-  .nav.on { display: flex; }
-  .nav .btn { margin: 6px 0 0; }
-}
-
-/* hero */
-.hero { padding: 64px 0 56px; position: relative; overflow: hidden; }
-.hero::before { content: ""; position: absolute; left: -60px; top: 40px; width: 320px; height: 320px; background-image: radial-gradient(var(--muted) 1.6px, transparent 1.6px); background-size: 16px 16px; opacity: .22; pointer-events: none; }
-.hero__in { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; position: relative; }
-.hero p.lead { font-size: 1.15rem; color: var(--muted); max-width: 560px; }
-.hero__logo { background: #fff; border-radius: 24px; box-shadow: 0 30px 60px -30px rgba(0,0,0,.35); padding: 24px; }
-.hero__logo img { width: 100%; border-radius: 12px; }
-@media (max-width: 860px) { .hero__in { grid-template-columns: 1fr; } .hero__logo { max-width: 420px; } }
-
-/* secções */
-.sec { padding: 72px 0; }
-.sec--soft { background: var(--soft); }
-.sec--dark { background: var(--dark); color: #d7dce2; }
-.sec--dark h2, .sec--dark h3 { color: #fff; }
-.head { max-width: 720px; margin-bottom: 36px; }
-.grid3 { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); }
-.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; }
-.card .num { font-weight: 800; font-size: 1.5rem; color: var(--red); display: block; margin-bottom: 6px; }
-.sec--dark .card { background: #16252a; border-color: #223338; }
-
-/* direcção */
-.team { display: grid; gap: 22px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); }
-.member { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
-.member img { width: 100%; aspect-ratio: 1; object-fit: cover; object-position: 50% 18%; }
-.member figcaption { padding: 16px 18px 18px; border-top: 5px solid; border-image: linear-gradient(90deg, var(--yellow) 0 33.3%, var(--pink) 33.3% 66.6%, var(--blue) 66.6%) 1; }
-.member b { display: block; color: var(--ink); font-size: 1.08rem; }
-.member span { color: var(--muted); font-size: .92rem; }
-
-/* adesão */
-.join { display: grid; grid-template-columns: .9fr 1.1fr; gap: 36px; align-items: start; }
-@media (max-width: 860px) { .join { grid-template-columns: 1fr; } }
-.join ul { padding-left: 20px; margin: 0 0 20px; }
-.join li { margin-bottom: 8px; }
-.formframe { width: 100%; min-height: 720px; border: 1px solid var(--line); border-radius: 16px; background: #fff; }
-
-/* contacto */
-.form { display: grid; gap: 14px; }
-.form label { display: grid; gap: 6px; font-weight: 700; font-size: .9rem; color: var(--ink); }
-.form input, .form textarea { font: inherit; font-weight: 400; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; width: 100%; }
-.form textarea { min-height: 140px; resize: vertical; }
-.two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-@media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
-.msg { padding: 12px 14px; border-radius: 10px; font-weight: 500; }
-.msg--ok { background: #e6f6ec; color: #14663a; }
-.msg--mau { background: #fde8e9; color: #a3121a; }
-.hp { position: absolute; left: -9999px; }
-.contact { display: grid; grid-template-columns: .8fr 1.2fr; gap: 36px; }
-@media (max-width: 860px) { .contact { grid-template-columns: 1fr; } }
-.contact ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
-.contact li a { text-decoration: none; font-weight: 700; color: var(--red); }
-
-/* rodapé */
-.foot { background: var(--dark); color: #9fb0b6; padding: 36px 0 28px; font-size: .9rem; }
-.foot__in { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; align-items: center; }
-.foot b { color: #fff; }
-.foot a { color: #fff; }
-</style>
+<link rel="stylesheet" href="app.css">
 </head>
 <body>
+<a class="skip" href="#main">Saltar para o conteúdo</a>
 <header class="top">
   <div class="wrap top__in">
-    <a class="brand" href="#inicio" aria-label="AACPD — início"><img src="img/logo-aacpd.jpg" alt="">AACPD</a>
+    <a class="brand" href="#/" aria-label="AACPD — início"><img src="img/logo-aacpd.jpg" alt=""><span>AACPD</span></a>
     <button class="menu-btn" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="nav"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     <nav class="nav" id="nav" aria-label="Principal">
-      <a href="#sobre">Sobre</a>
-      <a href="#direccao">Direcção</a>
-      <a href="#adesao">Adesão</a>
-      <a href="#contacto">Contacto</a>
-      <a class="btn" href="#adesao">Tornar-me membro</a>
+      <a href="#/sobre" data-nav="sobre">Sobre</a>
+      <a href="#/noticias" data-nav="noticias">Notícias</a>
+      <a href="#/beneficios" data-nav="beneficios">Benefícios</a>
+      <a href="#/membros" data-nav="membros">Membros</a>
+      <a href="#/contacto" data-nav="contacto">Contacto</a>
+      <span id="navConta"></span>
     </nav>
   </div>
 </header>
 <div class="bar"></div>
-
-<main id="inicio">
-  <section class="hero">
-    <div class="wrap hero__in">
-      <div>
-        <div class="kicker"><span class="dots"><i></i><i></i><i></i></span>Associação Angolana</div>
-        <h1>Associação Angolana dos Canais e Plataformas Digitais</h1>
-        <p class="lead">Unimos e representamos os canais, as plataformas digitais, os influenciadores e os criadores de conteúdo de Angola, para um ecossistema digital mais forte, profissional e reconhecido.</p>
-        <div class="btns"><a class="btn" href="#adesao">Tornar-me membro</a><a class="btn btn--line" href="#direccao">Conhecer a direcção</a></div>
-      </div>
-      <div class="hero__logo"><img src="img/logo-faixa.jpg" alt="Logótipo da AACPD — Associação Angolana dos Canais e Plataformas Digitais"></div>
-    </div>
-  </section>
-
-  <section class="sec sec--soft" id="sobre">
-    <div class="wrap">
-      <div class="head">
-        <div class="kicker">Sobre a AACPD</div>
-        <h2>Uma voz para o digital angolano</h2>
-        <p>A AACPD reúne quem cria, publica e constrói comunidades no digital em Angola: canais, plataformas, influenciadores e criadores de conteúdo.</p>
-      </div>
-      <div class="grid3">
-        <div class="card"><span class="num">01</span><h3>Representar</h3><p>Ser a voz dos canais e plataformas digitais junto de instituições, marcas e parceiros.</p></div>
-        <div class="card"><span class="num">02</span><h3>Profissionalizar</h3><p>Promover boas práticas, formação e reconhecimento da criação de conteúdo como profissão.</p></div>
-        <div class="card"><span class="num">03</span><h3>Ligar</h3><p>Criar pontes entre criadores, empresas e projectos sociais e de inovação.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="sec" id="direccao">
-    <div class="wrap">
-      <div class="head">
-        <div class="kicker">Órgãos sociais</div>
-        <h2>Direcção</h2>
-      </div>
-      <div class="team">
-        <figure class="member"><img src="img/sarchel-necesio.jpg" alt="Sarchel Nécesio" loading="lazy"><figcaption><b>Sarchel Nécesio</b><span>Presidente da Associação</span></figcaption></figure>
-        <figure class="member"><img src="img/nuno-baio.jpg" alt="Nuno Baio" loading="lazy"><figcaption><b>Nuno Baio</b><span>Vice-Presidente para a Área de Influenciadores Digitais e Criadores de Conteúdo</span></figcaption></figure>
-        <figure class="member"><img src="img/david-moma.jpg" alt="David Moma" loading="lazy"><figcaption><b>David Moma</b><span>Vice-Presidente para a Área Social de Projectos e Inovações</span></figcaption></figure>
-        <figure class="member"><img src="img/ildo-espinha.jpg" alt="Ildo Espinha" loading="lazy"><figcaption><b>Ildo Espinha</b><span>Secretário-Geral da Associação</span></figcaption></figure>
-        <figure class="member"><img src="img/mariano-fonseca.jpg" alt="Mariano Fonseca" loading="lazy"><figcaption><b>Mariano Fonseca</b><span>Director Nacional para Marketing e Comunicação Institucional</span></figcaption></figure>
-      </div>
-    </div>
-  </section>
-
-  <section class="sec sec--soft" id="adesao">
-    <div class="wrap join">
-      <div>
-        <div class="kicker">Adesão</div>
-        <h2>Faça parte da AACPD</h2>
-        <p>Tem um canal, uma plataforma digital ou cria conteúdo? Junte-se à associação.</p>
-        <ul><li>Representação do sector</li><li>Rede de criadores, marcas e parceiros</li><li>Iniciativas de formação e projectos</li></ul>
-        <p><a class="btn" href="https://www.jotform.com/263106320699054" target="_blank" rel="noopener">Abrir o formulário numa nova página</a></p>
-      </div>
-      <iframe class="formframe" title="Formulário da AACPD" src="https://form.jotform.com/263106320699054" loading="lazy" allow="geolocation; microphone; camera"></iframe>
-    </div>
-  </section>
-
-  <section class="sec" id="contacto">
-    <div class="wrap contact">
-      <div>
-        <div class="kicker">Contacto</div>
-        <h2>Fale connosco</h2>
-        <p>Parcerias, imprensa, dúvidas sobre a adesão: escreva-nos.</p>
-        <ul>
-          <li>Site: <a href="https://www.assodigital.org" target="_blank" rel="noopener">www.assodigital.org</a></li>
-          <li>Redes sociais: <a href="https://www.instagram.com/assodigital" target="_blank" rel="noopener">@assodigital</a> no Facebook, Instagram e X</li>
-        </ul>
-      </div>
-      <form class="form card" id="fContacto" novalidate>
-        <div class="two"><label>Nome<input name="nome" required minlength="2" maxlength="120" autocomplete="name"></label><label>Email<input name="email" type="email" required maxlength="160" autocomplete="email"></label></div>
-        <div class="two"><label>Telefone / WhatsApp<input name="telefone" type="tel" maxlength="40" autocomplete="tel"></label><label>Assunto<input name="assunto" maxlength="160"></label></div>
-        <label>Mensagem<textarea name="mensagem" required minlength="5" maxlength="3000"></textarea></label>
-        <label class="hp" aria-hidden="true">Não preencher<input name="site" tabindex="-1" autocomplete="off"></label>
-        <div><button class="btn" type="submit">Enviar mensagem</button></div>
-        <div id="fMsg" aria-live="polite"></div>
-      </form>
-    </div>
-  </section>
-</main>
-
+<main id="main" tabindex="-1"></main>
 <div class="bar"></div>
 <footer class="foot">
-  <div class="wrap foot__in">
-    <div><b>AACPD</b> · Associação Angolana dos Canais e Plataformas Digitais</div>
-    <div><a href="https://www.assodigital.org" target="_blank" rel="noopener">www.assodigital.org</a> · @assodigital</div>
+  <div class="wrap foot__grid">
+    <div><img class="foot__logo" src="img/logo-faixa.jpg" alt="AACPD — Associação Angolana dos Canais e Plataformas Digitais"><p id="fMissao"></p></div>
+    <div><h4>Associação</h4><a href="#/sobre">Sobre e direcção</a><a href="#/noticias">Notícias e imprensa</a><a href="#/membros">Directório de membros</a><a href="#/verificar">Verificar cartão de membro</a></div>
+    <div><h4>Membros</h4><a href="#/adesao">Aderir</a><a href="#/beneficios">Benefícios</a><a href="#/conta">Área do membro</a></div>
+    <div><h4>Contacto</h4><div id="fContactos"></div></div>
   </div>
+  <div class="wrap foot__base">© <span id="fAno"></span> AACPD · Associação Angolana dos Canais e Plataformas Digitais</div>
 </footer>
-
-<script>
-(function () {
-  var SUPABASE_URL = "https://wabzbkcgrrrseeaebsmh.supabase.co";
-  var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhYnpia2NncnJyc2VlYWVic21oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1NTQyMTcsImV4cCI6MjExMTEzMDIxN30.5Aj_OwB8889LfkaV6pt1wxJRhnWK38V_XBLpoGli5WQ";
-  var btn = document.querySelector(".menu-btn"), nav = document.getElementById("nav");
-  btn.addEventListener("click", function () { var on = nav.classList.toggle("on"); btn.setAttribute("aria-expanded", on); });
-  nav.addEventListener("click", function (e) { if (e.target.closest("a")) { nav.classList.remove("on"); btn.setAttribute("aria-expanded", "false"); } });
-  var f = document.getElementById("fContacto"), out = document.getElementById("fMsg");
-  function aviso(t, ok) { out.innerHTML = '<div class="msg ' + (ok ? "msg--ok" : "msg--mau") + '"></div>'; out.firstChild.textContent = t; }
-  f.addEventListener("submit", async function (e) {
-    e.preventDefault();
-    var d = new FormData(f), v = function (k) { return String(d.get(k) || "").trim(); };
-    if (v("site")) return;
-    if (v("nome").length < 2 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v("email")) || v("mensagem").length < 5) { aviso("Preencha o nome, um email válido e a mensagem.", false); return; }
-    var b = f.querySelector("button"); b.disabled = true; b.textContent = "A enviar…";
-    try {
-      var r = await fetch(SUPABASE_URL + "/rest/v1/mensagens", { method: "POST", headers: { apikey: SUPABASE_KEY, Authorization: "Bearer " + SUPABASE_KEY, "Content-Type": "application/json", Prefer: "return=minimal" },
-        body: JSON.stringify({ nome: v("nome"), email: v("email"), telefone: v("telefone"), assunto: v("assunto"), mensagem: v("mensagem") }) });
-      if (!r.ok) throw new Error(r.status);
-      f.reset(); aviso("Mensagem enviada. Obrigado! Responderemos em breve.", true);
-    } catch (x) { aviso("Não foi possível enviar agora. Tente de novo ou contacte-nos pelas redes sociais.", false); }
-    finally { b.disabled = false; b.textContent = "Enviar mensagem"; }
-  });
-})();
-</script>
+<div id="modal" class="modal" hidden><div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="mTitle"><button class="modal__x" type="button" aria-label="Fechar" data-close>&times;</button><div id="mBody"></div></div></div>
+<script src="vendor/supabase.js"></script>
+<script src="vendor/qrcode.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
