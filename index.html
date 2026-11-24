@@ -14,13 +14,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="app.css">
+<script>try{var t=localStorage.getItem("aacpd-tema");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 </head>
 <body>
 <a class="skip" href="#main">Saltar para o conteúdo</a>
 <header class="top">
   <div class="wrap top__in">
     <a class="brand" href="#/" aria-label="AACPD — início"><img src="img/logo-aacpd.jpg" alt=""><span>AACPD</span></a>
-    <button class="menu-btn" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="nav"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <div class="top__tools"><button class="tema-btn" type="button" id="temaBtn" aria-label="Mudar tema"></button>
+    <button class="menu-btn" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="nav"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
     <nav class="nav" id="nav" aria-label="Principal">
       <a href="#/sobre" data-nav="sobre">Sobre</a>
       <a href="#/noticias" data-nav="noticias">Notícias</a>

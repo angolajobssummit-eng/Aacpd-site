@@ -326,3 +326,13 @@ body.busy { cursor: progress; }
   .rot span { opacity: 0; } .rot span:first-child { opacity: 1; transform: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
 }
+
+/* ---- tema claro / escuro ---- */
+.top__tools { display: flex; align-items: center; gap: 4px; order: 3; }
+.top__in { flex-wrap: nowrap; }
+.tema-btn { border: 1px solid var(--line); background: var(--card); color: var(--ink); height: 40px; padding: 0 12px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 700; font-size: .82rem; white-space: nowrap; }
+.tema-btn:hover { background: var(--soft); }
+.tema-btn svg { width: 18px; height: 18px; }
+@media (min-width: 901px) { .top__tools { order: 3; } .nav { order: 2; margin-left: auto; } .top__in > .brand { order: 1; } }
+@media (max-width: 420px) { .tema-btn span { display: none; } .tema-btn { padding: 0 10px; } }
+@media (max-width: 900px) { .top__tools { margin-left: auto; } }

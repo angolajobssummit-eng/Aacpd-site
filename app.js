@@ -563,6 +563,21 @@
       default: pgNada();
     }
   }
+  /* tema claro / escuro / automático */
+  var TEMAS = { auto: ["Automático", "M12 3a9 9 0 1 0 0 18zM12 3a9 9 0 0 1 0 18"], light: ["Claro", "M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"], dark: ["Escuro", "M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"] };
+  function temaActual() { try { return localStorage.getItem("aacpd-tema") || "auto"; } catch (e) { return "auto"; } }
+  function aplicarTema(t) {
+    if (t === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", t);
+    try { localStorage.setItem("aacpd-tema", t); } catch (e) {}
+    var b = document.getElementById("temaBtn"), x = TEMAS[t];
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + x[1] + '"/></svg><span>' + x[0] + "</span>";
+    b.setAttribute("aria-label", "Tema: " + x[0] + ". Clique para mudar.");
+    var escuro = t === "dark" || (t === "auto" && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
+    document.querySelector('meta[name="theme-color"]').setAttribute("content", escuro ? "#0c1013" : "#d71920");
+  }
+  document.getElementById("temaBtn").addEventListener("click", function () { var o = ["auto", "light", "dark"], t = o[(o.indexOf(temaActual()) + 1) % 3]; aplicarTema(t); toast("Tema: " + TEMAS[t][0]); });
+  aplicarTema(temaActual());
+
   var nav = document.getElementById("nav"), mb = document.querySelector(".menu-btn");
   mb.addEventListener("click", function () { var on = nav.classList.toggle("on"); mb.setAttribute("aria-expanded", on); });
   window.addEventListener("hashchange", function () { nav.classList.remove("on"); fechar(); render(); window.scrollTo(0, 0); });
