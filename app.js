@@ -112,27 +112,49 @@
 
   /* ---------- páginas públicas ---------- */
   function pgInicio() {
-    var N = need("pub:noticias", function () { return sb.from("noticias").select("*").eq("publicado", true).order("destaque", { ascending: false }).order("publicado_em", { ascending: false }).limit(3).then(ok); });
+    var N = need("pub:noticias", function () { return sb.from("noticias").select("*").eq("publicado", true).order("destaque", { ascending: false }).order("publicado_em", { ascending: false }).limit(4).then(ok); });
     var Dd = need("pub:direccao", function () { return sb.from("direccao").select("*").order("ordem").then(ok); });
-    var DirN = need("pub:dircount", function () { return sb.from("v_directorio").select("numero", { count: "exact", head: true }).then(function (r) { return r.count || 0; }); });
-    var site = S.defs.site || {};
-    main.innerHTML = '<section class="hero"><div class="wrap hero__in"><div><div class="kicker"><span class="dots"><i></i><i></i><i></i></span>Associação Angolana</div>' +
-      "<h1>Associação Angolana dos Canais e Plataformas Digitais</h1><p class=\"lead\">" + esc(site.missao || "") + "</p>" +
-      '<div class="btns"><a class="btn" href="#/adesao">Tornar-me membro</a><a class="btn btn--line" href="#/beneficios">Ver benefícios</a></div></div>' +
-      '<div class="hero__logo"><img src="img/logo-faixa.jpg" alt="Logótipo da AACPD"></div></div></section>' +
-      '<section class="sec sec--soft"><div class="wrap"><div class="head"><div class="kicker">Porquê aderir</div><h2>Mais força para quem cria no digital</h2></div><div class="grid4">' +
-        '<div class="card"><span class="num">01</span><h3>Representação</h3><p class="small" style="margin:0">Uma voz junto de instituições, marcas e parceiros.</p></div>' +
-        '<div class="card"><span class="num">02</span><h3>Benefícios exclusivos</h3><p class="small" style="margin:0">Descontos e vantagens de parceiros para membros com quota em dia.</p></div>' +
-        '<div class="card"><span class="num">03</span><h3>Cartão de membro digital</h3><p class="small" style="margin:0">Identificação verificável com QR, reconhecida pelos parceiros.</p></div>' +
-        '<div class="card"><span class="num">04</span><h3>Rede e visibilidade</h3><p class="small" style="margin:0">Directório público de membros, formação, eventos e projectos.</p></div>' +
+    var Nums = need("pub:nums", function () {
+      return Promise.all([sb.from("v_directorio").select("numero", { count: "exact", head: true }), sb.from("noticias").select("id", { count: "exact", head: true }).eq("publicado", true), sb.from("v_beneficios").select("id", { count: "exact", head: true })])
+        .then(function (r) { return { membros: r[0].count || 0, noticias: r[1].count || 0, beneficios: r[2].count || 0 }; });
+    });
+    var site = S.defs.site || {}, D = Array.isArray(Dd) ? Dd : [], nums = Nums && !Nums.erro ? Nums : { membros: 0, noticias: 0, beneficios: 0 };
+    var redes = ["YouTube", "TikTok", "Instagram", "Facebook", "X", "Kwai", "LinkedIn", "Podcasts", "Blogs", "Portais", "Twitch", "WhatsApp Channels"];
+    var noticias = Array.isArray(N) ? N : [];
+    main.innerHTML =
+      '<section class="hx"><div class="hx__dots" aria-hidden="true"></div><div class="wrap hx__in"><div class="hx__txt">' +
+        '<div class="kicker kicker--light"><span class="dots"><i></i><i></i><i></i></span>Associação Angolana dos Canais e Plataformas Digitais</div>' +
+        '<h1>A casa dos <span class="rot" aria-live="off"><span>criadores de conteúdo</span><span>canais digitais</span><span>influenciadores</span><span>podcasters</span><span>plataformas digitais</span></span><br>de Angola.</h1>' +
+        '<p class="hx__lead">' + esc(site.missao || "") + "</p>" +
+        '<div class="btns"><a class="btn btn--glow" href="#/adesao">Tornar-me membro</a><a class="btn btn--ghost" href="#/beneficios">Ver benefícios</a></div>' +
+        '<div class="hx__trust"><span class="stack">' + D.slice(0, 4).map(function (d) { return '<img src="' + esc(pubUrl(d.foto)) + '" alt="">'; }).join("") + '</span><span>Uma direcção de profissionais do digital angolano</span></div>' +
+      '</div><div class="hx__mosaic" aria-hidden="true">' + D.slice(0, 5).map(function (d, i) { return '<figure class="tile tile--' + i + '"><img src="' + esc(pubUrl(d.foto)) + '" alt=""><figcaption>' + esc(d.nome) + "</figcaption></figure>"; }).join("") + "</div></div>" +
+      '<div class="marquee" aria-hidden="true"><div class="marquee__in">' + redes.concat(redes).map(function (r) { return "<span>" + esc(r) + "</span>"; }).join("") + "</div></div></section>" +
+      (function () {
+        var cs = [[nums.membros, "membros no directório"], [PROVINCIAS.length, "províncias e diáspora"], [nums.beneficios, "benefícios para membros"], [nums.noticias, "notícias e comunicados"], [TIPOS.length, "tipos de membro"]].filter(function (c) { return c[0] > 0; }).slice(0, 4);
+        return '<section class="sec"><div class="wrap"><div class="counters reveal" style="grid-template-columns:repeat(' + cs.length + ',1fr)">' + cs.map(function (c) { return '<div class="counter"><b data-count="' + c[0] + '">0</b><span>' + c[1] + "</span></div>"; }).join("") + "</div></div></section>";
+      })() +
+      '<section class="sec sec--soft"><div class="wrap"><div class="head reveal"><div class="kicker">Porquê aderir</div><h2>Mais força para quem cria no digital</h2></div><div class="grid4">' +
+        [["🎙️", "Representação", "Uma voz forte junto de instituições, marcas e parceiros."], ["🎁", "Benefícios exclusivos", "Descontos e vantagens de parceiros para membros com quota em dia."], ["🪪", "Cartão digital com QR", "Identificação verificável, reconhecida pelos parceiros."], ["🚀", "Rede e visibilidade", "Directório público, formação, eventos e projectos."]]
+          .map(function (x, i) { return '<div class="card feat reveal" style="--d:' + i * 90 + 'ms"><span class="feat__ic">' + x[0] + "</span><h3>" + x[1] + '</h3><p class="small" style="margin:0">' + x[2] + "</p></div>"; }).join("") +
       "</div></div></section>" +
-      (S.defs.planos.length ? '<section class="sec"><div class="wrap"><div class="sec__head"><div><div class="kicker">Quotas</div><h2>Planos de adesão</h2></div><a class="btn btn--line btn--sm" href="#/adesao">Aderir agora</a></div><div class="grid4">' +
-        S.defs.planos.map(function (p, i) { return '<div class="card plan' + (i === 1 ? " plan--top" : "") + '"><h3>' + esc(p.nome) + '</h3><p class="small">' + esc(p.descricao || "") + "</p>" + precoPlano(p) + '<a class="btn btn--sm" href="#/adesao?plano=' + esc(p.id) + '" style="margin-top:12px">Escolher</a></div>'; }).join("") + "</div></div></section>" : "") +
-      '<section class="sec sec--soft"><div class="wrap"><div class="sec__head"><div><div class="kicker">Notícias e imprensa</div><h2>Últimas da AACPD</h2></div><a class="btn btn--line btn--sm" href="#/noticias">Todas as notícias</a></div>' +
-        (N === undefined ? carregando() : falhou(N) || (N.length ? '<div class="grid3">' + N.map(cardNoticia).join("") + "</div>" : '<div class="empty">Em breve.</div>')) + "</div></section>" +
-      '<section class="sec"><div class="wrap"><div class="sec__head"><div><div class="kicker">Órgãos sociais</div><h2>Direcção</h2></div><a class="btn btn--line btn--sm" href="#/sobre">Sobre a AACPD</a></div>' +
-        (Dd === undefined ? carregando() : falhou(Dd) || '<div class="team">' + Dd.slice(0, 5).map(pessoa).join("") + "</div>") + "</div></section>" +
-      '<section class="sec sec--soft"><div class="wrap"><div class="card" style="display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap"><div><h2 style="margin:0 0 6px">Faça parte da AACPD</h2><p class="muted" style="margin:0">' + (typeof DirN === "number" && DirN > 0 ? DirN + " membros já no directório. " : "") + "Adesão online em 3 minutos.</p></div><a class=\"btn\" href=\"#/adesao\">Aderir agora</a></div></div></section>";
+      (noticias.length ? '<section class="sec"><div class="wrap"><div class="sec__head reveal"><div><div class="kicker">Notícias e imprensa</div><h2>Últimas da AACPD</h2></div><a class="btn btn--line btn--sm" href="#/noticias">Todas as notícias</a></div><div class="news reveal">' +
+        '<a class="news__main" href="#/noticias/' + esc(noticias[0].slug) + '"><div class="news__img">' + (noticias[0].imagem ? '<img src="' + esc(pubUrl(noticias[0].imagem)) + '" alt="">' : '<div class="ph">AACPD</div>') + '</div><div class="news__body"><span class="badge badge--red">' + esc(noticias[0].categoria) + "</span><h3>" + esc(noticias[0].titulo) + "</h3><p>" + esc(noticias[0].resumo) + '</p><span class="small">' + esc(data(noticias[0].publicado_em)) + "</span></div></a>" +
+        '<div class="news__side">' + (noticias.length > 1 ? noticias.slice(1).map(function (n) { return '<a class="news__item" href="#/noticias/' + esc(n.slug) + '"><span class="badge badge--red">' + esc(n.categoria) + "</span><b>" + esc(n.titulo) + '</b><span class="small">' + esc(data(n.publicado_em)) + "</span></a>"; }).join("") : '<div class="news__item"><b>Mais notícias em breve</b><span class="small">Acompanhe também @assodigital nas redes sociais.</span></div>') + "</div></div></div></section>" : "") +
+      (S.defs.planos.length ? '<section class="sec sec--soft"><div class="wrap"><div class="sec__head reveal"><div><div class="kicker">Quotas</div><h2>Planos de adesão</h2></div></div><div class="grid4">' +
+        S.defs.planos.map(function (p, i) { return '<div class="card plan reveal' + (i === 1 ? " plan--top" : "") + '" style="--d:' + i * 90 + 'ms">' + (i === 1 ? '<span class="badge badge--red" style="align-self:flex-start">Mais escolhido</span>' : "") + "<h3>" + esc(p.nome) + '</h3><p class="small">' + esc(p.descricao || "") + "</p>" + precoPlano(p) + '<a class="btn btn--sm" href="#/adesao?plano=' + esc(p.id) + '" style="margin-top:12px">Escolher</a></div>'; }).join("") + "</div></div></section>" : "") +
+      '<section class="sec"><div class="wrap"><div class="sec__head reveal"><div><div class="kicker">Órgãos sociais</div><h2>Direcção</h2></div><a class="btn btn--line btn--sm" href="#/sobre">Sobre a AACPD</a></div>' +
+        (Dd === undefined ? carregando() : falhou(Dd) || '<div class="team">' + D.slice(0, 5).map(function (d, i) { return pessoa(d).replace('<figure class="member"', '<figure class="member reveal" style="--d:' + i * 80 + 'ms"'); }).join("") + "</div>") + "</div></section>" +
+      '<section class="cta"><div class="wrap cta__in reveal"><div><h2>Faça parte da AACPD</h2><p>Adesão online em 3 minutos. Cartão de membro digital no telemóvel.</p></div><a class="btn btn--white" href="#/adesao">Aderir agora</a></div></section>';
+    animar();
+  }
+  function animar() {
+    var reduz = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var els = main.querySelectorAll(".reveal");
+    if (reduz || !("IntersectionObserver" in window)) { els.forEach(function (e) { e.classList.add("in"); }); main.querySelectorAll("[data-count]").forEach(function (e) { e.textContent = e.dataset.count; }); return; }
+    var io = new IntersectionObserver(function (ent) { ent.forEach(function (x) { if (!x.isIntersecting) return; x.target.classList.add("in"); io.unobserve(x.target);
+      x.target.querySelectorAll("[data-count]").forEach(function (c) { var alvo = Number(c.dataset.count) || 0, t0 = performance.now(); (function passo(t) { var k = Math.min(1, (t - t0) / 1200); c.textContent = Math.round(alvo * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(passo); })(t0); }); }); }, { threshold: .15 });
+    els.forEach(function (e) { io.observe(e); });
   }
   function pessoa(d) { return '<figure class="member"><img src="' + esc(pubUrl(d.foto) || "img/logo-aacpd.jpg") + '" alt="' + esc(d.nome) + '" loading="lazy"><figcaption><b>' + esc(d.nome) + "</b><span>" + esc(d.cargo) + "</span></figcaption></figure>"; }
 
