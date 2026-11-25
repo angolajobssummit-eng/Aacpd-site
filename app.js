@@ -205,6 +205,83 @@
     document.getElementById("fDir").addEventListener("submit", function (e) { e.preventDefault(); var d = new FormData(this); location.hash = "#/membros?" + ["q", "tipo", "prov"].map(function (k) { return k + "=" + encodeURIComponent(d.get(k) || ""); }).join("&"); });
   }
 
+  /* ---------- denúncia de fake news ---------- */
+  var DN_CATS = ["Desinformação / notícia falsa", "Conteúdo manipulado ou montagem", "Perfil falso ou usurpação de identidade", "Burla ou fraude online", "Discurso de ódio ou incitação", "Outro"];
+  var DN_PLATS = ["WhatsApp", "Facebook", "Instagram", "TikTok", "YouTube", "X / Twitter", "Kwai", "Telegram", "Site / Blog", "Televisão / Rádio", "Outra"];
+  var DN_EST = { recebida: ["Recebida", ""], em_analise: ["Em análise", "warn"], falso: ["Falso", "red"], enganador: ["Enganador", "warn"], verdadeiro: ["Verdadeiro", "ok"], sem_fundamento: ["Sem fundamento", ""], encaminhada: ["Encaminhada às autoridades", "warn"] };
+  var DN_MIME = ["image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf"];
+  function badgeDn(e) { var x = DN_EST[e] || [e, ""]; return '<span class="badge' + (x[1] ? " badge--" + x[1] : "") + '">' + esc(x[0]) + "</span>"; }
+  function opts(lista, sel) { return lista.map(function (o) { return "<option" + (o === sel ? " selected" : "") + ">" + esc(o) + "</option>"; }).join(""); }
+  function cartaoVerif(v) { return '<article class="verif verif--' + esc(v.estado) + '"><div class="verif__top">' + badgeDn(v.estado) + '<span class="small">' + esc(v.plataforma || "") + (v.plataforma ? " · " : "") + esc(curta(v.actualizado_em)) + "</span></div><h3>" + esc(v.titulo) + "</h3>" + (v.resumo_publico ? '<p class="small" style="white-space:pre-line">' + esc(v.resumo_publico) + "</p>" : "") + '<p class="small muted" style="margin:0">' + esc(v.categoria) + " · " + esc(v.protocolo) + "</p></article>"; }
+
+  function pgDenunciar() {
+    var V = need("pub:verif", function () { return sb.from("v_verificacoes").select("*").order("actualizado_em", { ascending: false }).limit(30).then(ok); });
+    var hoje = new Date().toISOString().slice(0, 10);
+    main.innerHTML = '<section class="dn-hero"><div class="wrap"><div class="kicker kicker--light">Combate à desinformação</div><h1>Denunciar fake news</h1><p>Viu uma notícia falsa, um vídeo manipulado, um perfil falso ou uma burla nas redes? Envie-nos. A equipa da AACPD analisa, verifica junto das fontes e publica o resultado. Pode denunciar <b>de forma anónima</b>.</p><div class="btns"><button class="btn btn--white" type="button" data-act="dn-ir">Fazer denúncia</button><a class="btn btn--ghost" href="#/denunciar/acompanhar">Acompanhar denúncia</a></div></div></section>' +
+      '<div class="wrap split dn-grid" style="padding:36px 0 20px">' +
+      '<form class="form card" id="dnForm" novalidate><h2 style="font-size:1.35rem;margin:0">O que quer denunciar?</h2>' +
+      '<label>Link do conteúdo <span class="hint">Se tiver. Se for no WhatsApp, envie a captura de ecrã.</span><input name="link" maxlength="600" inputmode="url" placeholder="https://..."></label>' +
+      '<div class="two"><label>Onde viu<select name="plataforma" required>' + opts(DN_PLATS) + '</select></label><label>Tipo de conteúdo<select name="categoria" required>' + opts(DN_CATS) + "</select></label></div>" +
+      '<label>Título ou resumo curto<input name="titulo" required minlength="3" maxlength="200" placeholder="Ex.: Vídeo diz que o exame nacional foi cancelado"></label>' +
+      '<label>Descrição<textarea name="descricao" required minlength="10" maxlength="4000" placeholder="O que diz o conteúdo, porque acha que é falso, quem está a partilhar…"></textarea></label>' +
+      '<div class="two"><label>Quando viu<input name="visto_em" type="date" max="' + hoje + '"></label><label>Provas (até 5 ficheiros)<input name="ficheiros" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"><span class="hint">Imagens ou PDF, máx. 5 MB cada.</span></label></div>' +
+      '<label class="check"><input type="checkbox" name="anonimo" checked> Quero denunciar de forma anónima</label>' +
+      '<fieldset class="fs" id="dnContacto" hidden><legend>Os seus contactos (só a AACPD vê)</legend><label>Nome<input name="nome" maxlength="120" autocomplete="name"></label><div class="two"><label>Email<input name="email" type="email" maxlength="160" autocomplete="email"></label><label>Telefone / WhatsApp<input name="telefone" maxlength="40" autocomplete="tel"></label></div></fieldset>' +
+      '<label class="check"><input type="checkbox" name="aceito" required> Declaro que a informação é verdadeira, de boa-fé, e autorizo a AACPD a analisá-la.</label>' +
+      '<label class="hp" aria-hidden="true">Não preencher<input name="site" tabindex="-1" autocomplete="off"></label>' +
+      '<div><button class="btn" type="submit">Enviar denúncia</button></div><div id="dnMsg" aria-live="polite"></div></form>' +
+      '<div><div class="box"><h3>Como funciona</h3><ol class="dn-passos"><li><b>Envie</b> o link, a captura de ecrã e uma descrição.</li><li><b>Guarde</b> o número de protocolo e o código que recebe.</li><li><b>Analisamos</b> com fontes oficiais, especialistas e as plataformas.</li><li><b>Publicamos</b> o veredicto: falso, enganador, verdadeiro ou sem fundamento.</li></ol></div>' +
+      '<div class="box"><h3>Já fez uma denúncia?</h3><p class="small">Consulte o estado com o protocolo e o código.</p><a class="btn btn--line btn--sm" href="#/denunciar/acompanhar">Acompanhar denúncia</a></div>' +
+      '<div class="box"><h3>Antes de partilhar</h3><ul class="dn-dicas"><li>Quem publicou? É uma fonte conhecida?</li><li>A data é recente ou é conteúdo antigo reciclado?</li><li>Outros órgãos de comunicação confirmam?</li><li>O título é alarmista ou pede para «partilhar já»?</li></ul></div>' +
+      '<p class="note">Em caso de ameaça, crime ou perigo imediato, contacte também as autoridades competentes.</p></div></div>' +
+      '<section class="wrap" style="padding:10px 0 60px"><div class="sec__head"><div><div class="kicker">Verificado pela AACPD</div><h2 style="font-size:1.5rem;margin:0">Verificações publicadas</h2></div></div>' +
+      (V === undefined ? carregando() : falhou(V) || (V.length ? '<div class="verifs">' + V.map(cartaoVerif).join("") + "</div>" : '<div class="empty">Ainda sem verificações publicadas.</div>')) + "</section>";
+
+    var f = document.getElementById("dnForm"), out = document.getElementById("dnMsg");
+    f.anonimo.addEventListener("change", function () { document.getElementById("dnContacto").hidden = f.anonimo.checked; });
+    f.addEventListener("submit", async function (e) {
+      e.preventDefault(); var d = new FormData(f), v = function (k) { return String(d.get(k) || "").trim(); };
+      if (v("site")) return;
+      var erro = v("titulo").length < 3 ? "Indique um título." : v("descricao").length < 10 ? "Descreva o conteúdo (pelo menos 10 caracteres)." : !f.aceito.checked ? "Confirme a declaração antes de enviar." : "";
+      var fich = Array.prototype.slice.call(f.ficheiros.files || []);
+      if (!erro && fich.length > 5) erro = "Pode anexar no máximo 5 ficheiros.";
+      if (!erro && fich.some(function (x) { return x.size > 5 * 1024 * 1024; })) erro = "Cada ficheiro deve ter até 5 MB.";
+      if (!erro && fich.some(function (x) { return DN_MIME.indexOf(x.type) < 0; })) erro = "Só são aceites imagens (JPG, PNG, WEBP, GIF) ou PDF.";
+      var anon = f.anonimo.checked;
+      if (!erro && !anon && !v("email") && !v("telefone")) erro = "Indique um email ou telefone, ou marque a opção anónima.";
+      if (erro) { out.innerHTML = '<div class="msg msg--mau">' + esc(erro) + "</div>"; return; }
+      var b = f.querySelector('button[type="submit"]'); b.disabled = true; b.textContent = "A enviar…"; out.innerHTML = ""; document.body.classList.add("busy");
+      try {
+        var caminhos = [];
+        for (var i = 0; i < fich.length; i++) {
+          var ext = (fich[i].name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 5) || "jpg", cam = "novas/" + Date.now() + "-" + Math.random().toString(36).slice(2, 10) + "." + ext;
+          ok(await sb.storage.from("denuncias").upload(cam, fich[i], { contentType: fich[i].type }));
+          caminhos.push(cam);
+        }
+        var r = ok(await sb.rpc("criar_denuncia", { p_link: v("link"), p_plataforma: v("plataforma"), p_categoria: v("categoria"), p_titulo: v("titulo"), p_descricao: v("descricao"), p_visto_em: v("visto_em") || null, p_ficheiros: caminhos, p_anonimo: anon, p_nome: v("nome"), p_email: v("email"), p_telefone: v("telefone") }));
+        var lk = "#/denunciar/acompanhar?p=" + encodeURIComponent(r.protocolo) + "&c=" + encodeURIComponent(r.codigo);
+        f.outerHTML = '<div class="card dn-ok" id="dnForm"><div class="status status--ok"><div><b>✓ Denúncia recebida. Obrigado!</b>Guarde estes dados para acompanhar a análise.</div></div><div class="dn-cod"><div><span>Protocolo</span><b>' + esc(r.protocolo) + '</b></div><div><span>Código</span><b>' + esc(r.codigo) + '</b></div></div><p class="small">Sem o código não é possível consultar a denúncia' + (anon ? " (como é anónima, não o podemos reenviar)" : "") + '.</p><div class="btns"><button class="btn btn--sm" type="button" data-act="dn-copiar" data-txt="' + esc("AACPD — denúncia " + r.protocolo + " · código " + r.codigo) + '">Copiar dados</button><a class="btn btn--line btn--sm" href="' + esc(lk) + '">Ver estado</a><a class="btn btn--line btn--sm" href="#/denunciar" data-act="dn-nova">Fazer outra denúncia</a></div></div>';
+        document.getElementById("dnForm").scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch (err) {
+        out.innerHTML = '<div class="msg msg--mau">' + esc(traduz(err).message) + "</div>"; b.disabled = false; b.textContent = "Enviar denúncia";
+      } finally { document.body.classList.remove("busy"); }
+    });
+  }
+
+  function pgAcompanhar(q) {
+    main.innerHTML = '<div class="wrap--n page-head" style="padding-bottom:60px"><div class="kicker">Denúncias</div><h1>Acompanhar denúncia</h1><p class="muted">Introduza o protocolo (por exemplo DN-2026-0001) e o código que recebeu ao enviar a denúncia.</p>' +
+      '<form class="filters" id="fAc"><input name="p" required placeholder="DN-2026-0001" value="' + esc(q.p || "") + '" aria-label="Protocolo" style="text-transform:uppercase"><input name="c" required placeholder="Código" value="' + esc(q.c || "") + '" aria-label="Código" style="text-transform:uppercase;max-width:160px"><button class="btn btn--sm" type="submit">Consultar</button></form><div id="acRes"></div><p class="small"><a class="linkbtn" href="#/denunciar">← Fazer uma nova denúncia</a></p></div>';
+    document.getElementById("fAc").addEventListener("submit", function (e) { e.preventDefault(); var d = new FormData(this); location.hash = "#/denunciar/acompanhar?p=" + encodeURIComponent(String(d.get("p")).trim().toUpperCase()) + "&c=" + encodeURIComponent(String(d.get("c")).trim().toUpperCase()); });
+    if (q.p && q.c) { var el = document.getElementById("acRes"); el.innerHTML = carregando();
+      sb.rpc("estado_denuncia", { p_protocolo: q.p, p_codigo: q.c }).then(function (r) {
+        var v = r.data || {}; if (!document.getElementById("acRes")) return;
+        var cls = { falso: "red", enganador: "warn", verdadeiro: "ok", em_analise: "warn", encaminhada: "warn" }[v.estado] || "ok";
+        el.innerHTML = r.error ? '<div class="msg msg--mau">' + esc(traduz(r.error).message) + "</div>" : !v.ok ? '<div class="status status--red"><div><b>Denúncia não encontrada</b>Confirme o protocolo e o código.</div></div>'
+          : '<div class="status status--' + cls + '"><div><b>' + esc(v.protocolo) + " · " + esc((DN_EST[v.estado] || [v.estado])[0]) + "</b>" + esc(v.titulo) + '</div></div><div class="box"><p class="small" style="margin-top:0">Recebida a ' + esc(data(v.criado_em)) + " · última actualização a " + esc(data(v.actualizado_em)) + "</p>" + (v.conclusao ? "<h3>Resposta da AACPD</h3><p style=\"white-space:pre-line;margin:0\">" + esc(v.conclusao) + "</p>" : '<p class="small" style="margin:0">' + (v.estado === "recebida" ? "A denúncia está na fila de análise." : "A equipa está a trabalhar nesta denúncia.") + " Volte a consultar mais tarde.</p>") + "</div>";
+      });
+    }
+  }
+
   function pgVerificar(num) {
     main.innerHTML = '<div class="wrap--n page-head" style="padding-bottom:60px"><div class="kicker">Parceiros</div><h1>Verificar cartão de membro</h1><p class="muted">Introduza o número do cartão (por exemplo AACPD-0001) ou leia o código QR.</p>' +
       '<form class="filters" id="fVer"><input name="n" type="search" required placeholder="AACPD-0001" value="' + esc(num || "") + '" aria-label="Número do cartão" style="text-transform:uppercase"><button class="btn btn--sm" type="submit">Verificar</button></form><div id="vRes"></div></div>';
@@ -332,11 +409,11 @@
   }
 
   /* ---------- administração ---------- */
-  var ATABS = [["", "Painel"], ["membros", "Membros"], ["quotas", "Quotas"], ["noticias", "Notícias"], ["beneficios", "Benefícios"], ["direccao", "Direcção"], ["mensagens", "Mensagens"], ["definicoes", "Definições"]];
+  var ATABS = [["", "Painel"], ["membros", "Membros"], ["quotas", "Quotas"], ["noticias", "Notícias"], ["beneficios", "Benefícios"], ["direccao", "Direcção"], ["mensagens", "Mensagens"], ["denuncias", "Denúncias"], ["definicoes", "Definições"]];
   function pgAdmin(sub, q) {
     if (!S.user) { main.innerHTML = '<div class="wrap--n page-head"><h1>Administração</h1><button class="btn" type="button" data-act="entrar">Entrar</button></div>'; return; }
     if (!isAdmin()) { main.innerHTML = '<div class="wrap--n page-head"><h1>Sem acesso</h1><p class="muted">Esta área é só para a administração da AACPD.</p></div>'; return; }
-    var corpo = "", fn = { "": admPainel, membros: admMembros, quotas: admQuotas, noticias: admNoticias, beneficios: admBeneficios, direccao: admDireccao, mensagens: admMensagens, definicoes: admDefinicoes }[sub];
+    var corpo = "", fn = { "": admPainel, membros: admMembros, quotas: admQuotas, noticias: admNoticias, beneficios: admBeneficios, direccao: admDireccao, mensagens: admMensagens, denuncias: admDenuncias, definicoes: admDefinicoes }[sub];
     if (!fn) return pgNada();
     corpo = fn(q);
     main.innerHTML = '<div class="adminhead"><div class="wrap"><div class="adminhead__t">Administração AACPD</div><div class="tabs">' + ATABS.map(function (t) { return '<a href="#/admin' + (t[0] ? "/" + t[0] : "") + '" class="' + (sub === t[0] ? "on" : "") + '">' + t[1] + "</a>"; }).join("") + '</div></div></div><div class="wrap" style="padding:24px 0 60px">' + corpo + "</div>";
@@ -345,10 +422,11 @@
   function admPainel() {
     var R = need("adm:resumo", function () { return sb.rpc("admin_resumo").then(ok); });
     if (R === undefined) return carregando(); if (R.erro) return falhou(R);
+    var DNn = need("adm:dn-novas", function () { return sb.from("denuncias").select("id", { count: "exact", head: true }).eq("estado", "recebida").then(function (r) { if (r.error) throw r.error; return { n: r.count || 0 }; }); });
     return '<div class="stats">' + [["activos", "membros activos", ""], ["em_dia", "com quota em dia", "ok"], ["pendentes", "pedidos de adesão por aprovar", "warn"], ["quotas_pendentes", "quotas por confirmar", "warn"], ["mensagens_novas", "mensagens novas", "red"]].map(function (k) { return '<div class="stat stat--' + k[2] + '"><b>' + (R[k[0]] || 0) + "</b><span>" + k[1] + "</span></div>"; }).join("") +
       '<div class="stat stat--ok"><b>' + esc(kz(R.receita_ano)) + '</b><span>quotas recebidas este ano</span></div><div class="stat stat--warn"><b>' + esc(kz(R.por_receber)) + "</b><span>por receber</span></div></div>" +
       '<div class="split" style="margin-top:20px"><div class="box"><h3>Receita de quotas · últimos 12 meses</h3>' + grafico(R.por_mes || []) + '</div><div class="box"><h3>Membros activos por tipo</h3>' + ((R.por_tipo || []).length ? '<div class="tablewrap"><table class="tbl"><tbody>' + R.por_tipo.map(function (x) { return "<tr><td>" + esc(x.tipo) + '</td><td class="num">' + x.n + "</td></tr>"; }).join("") + "</tbody></table></div>" : '<div class="empty">Ainda sem membros activos.</div>') +
-      '<div class="btns" style="margin-top:14px"><a class="btn btn--sm" href="#/admin/membros?e=pendente">Aprovar adesões (' + (R.pendentes || 0) + ')</a><a class="btn btn--line btn--sm" href="#/admin/quotas?e=pendente">Confirmar quotas (' + (R.quotas_pendentes || 0) + ")</a></div></div></div>";
+      '<div class="btns" style="margin-top:14px"><a class="btn btn--sm" href="#/admin/membros?e=pendente">Aprovar adesões (' + (R.pendentes || 0) + ')</a><a class="btn btn--line btn--sm" href="#/admin/quotas?e=pendente">Confirmar quotas (' + (R.quotas_pendentes || 0) + ')</a><a class="btn btn--line btn--sm" href="#/admin/denuncias?e=recebida">Denúncias novas (' + (DNn && !DNn.erro ? DNn.n : "…") + ")</a></div></div></div>";
   }
   function grafico(meses) {
     if (!meses.some(function (m) { return m.receita > 0; })) return '<div class="empty">Ainda sem quotas pagas.</div>';
@@ -407,6 +485,32 @@
     var M = need("adm:msgs", function () { return sb.from("mensagens").select("*").order("criado_em", { ascending: false }).limit(500).then(ok); });
     if (M === undefined) return carregando(); if (M.erro) return falhou(M);
     return M.length ? M.map(function (m) { return '<div class="box"' + (m.lida ? "" : ' style="border-left:4px solid var(--red)"') + '><div class="sec__head" style="margin-bottom:6px"><div><b style="color:var(--ink)">' + esc(m.nome) + '</b> <span class="small">' + esc(m.assunto) + " · " + esc(curta(m.criado_em)) + "</span>" + (m.lida ? "" : ' <span class="badge badge--red">Nova</span>') + '</div><div class="acts"><a class="btn btn--line btn--sm" href="mailto:' + esc(m.email) + "?subject=" + encodeURIComponent("AACPD — " + (m.assunto || "")) + '">Responder por email</a>' + (m.telefone ? '<a class="btn btn--wa btn--sm" target="_blank" rel="noopener" href="' + esc(wa(m.telefone)) + '">WhatsApp</a>' : "") + (m.lida ? "" : '<button class="btn btn--line btn--sm" type="button" data-act="msg-lida" data-id="' + m.id + '">Marcar lida</button>') + '<button class="btn btn--line btn--sm" type="button" data-act="msg-apagar" data-id="' + m.id + '">Apagar</button></div></div><p class="small" style="margin:0 0 6px">' + esc(m.email) + (m.telefone ? " · " + esc(m.telefone) : "") + '</p><p style="margin:0;white-space:pre-line">' + esc(m.mensagem) + "</p></div>"; }).join("") : '<div class="empty">Sem mensagens.</div>';
+  }
+  function admDenuncias(q) {
+    var L = need("adm:denuncias", function () { return sb.from("denuncias").select("*").order("criado_em", { ascending: false }).limit(1000).then(ok); });
+    if (L === undefined) return carregando(); if (L.erro) return falhou(L);
+    var f = (q.f || "").toLowerCase(), cont = {}; L.forEach(function (x) { cont[x.estado] = (cont[x.estado] || 0) + 1; });
+    var V = L.filter(function (x) { return (!q.e || x.estado === q.e) && (!f || (x.protocolo + " " + x.titulo + " " + x.descricao + " " + x.link + " " + x.plataforma).toLowerCase().indexOf(f) >= 0); });
+    return '<form class="filters" id="aFil" data-sub="denuncias"><input type="search" name="f" placeholder="Procurar protocolo, título, link" value="' + esc(q.f || "") + '"><select name="e"><option value="">Todas (' + L.length + ")</option>" + Object.keys(DN_EST).map(function (k) { return '<option value="' + k + '"' + (q.e === k ? " selected" : "") + ">" + DN_EST[k][0] + " (" + (cont[k] || 0) + ")</option>"; }).join("") + '</select><button class="btn btn--sm" type="submit">Filtrar</button><button class="btn btn--line btn--sm" type="button" data-act="csv-denuncias">Exportar CSV</button><a class="btn btn--line btn--sm" href="#/denunciar" target="_blank">Ver página pública</a></form>' +
+      (V.length ? '<div class="tablewrap"><table class="tbl"><thead><tr><th>Protocolo</th><th>Data</th><th>Denúncia</th><th>Onde</th><th>Provas</th><th>Estado</th><th></th></tr></thead><tbody>' + V.map(function (x) { return '<tr><td class="num">' + esc(x.protocolo) + "</td><td>" + esc(curta(x.criado_em)) + "</td><td><b>" + esc(x.titulo) + '</b><br><span class="small">' + esc(x.categoria) + (x.anonimo ? " · anónima" : " · " + esc(x.nome || x.email || x.telefone)) + "</span></td><td>" + esc(x.plataforma) + '</td><td class="num">' + (x.ficheiros || []).length + "</td><td>" + badgeDn(x.estado) + (x.publicar ? ' <span class="badge badge--ok">Público</span>' : "") + '</td><td><button class="btn btn' + (x.estado === "recebida" ? "" : " btn--line") + ' btn--sm" type="button" data-act="dn-ver" data-id="' + x.id + '">Analisar</button></td></tr>'; }).join("") + "</tbody></table></div>" : '<div class="empty">' + (L.length ? "Nenhuma denúncia com estes filtros." : "Ainda sem denúncias.") + "</div>");
+  }
+  function editarDenuncia(id) {
+    var x = (C["adm:denuncias"] || []).filter(function (d) { return d.id === id; })[0]; if (!x) return;
+    var lk = /^https?:\/\//i.test(x.link) ? x.link : "";
+    abrir('<h2 id="mTitle">' + esc(x.protocolo) + " " + badgeDn(x.estado) + '</h2><p class="small">' + esc(x.categoria) + " · " + esc(x.plataforma) + " · recebida a " + esc(data(x.criado_em)) + (x.visto_em ? " · vista a " + esc(curta(x.visto_em)) : "") + "</p>" +
+      '<div class="box"><b style="color:var(--ink)">' + esc(x.titulo) + '</b><p style="white-space:pre-line;margin:8px 0 0">' + esc(x.descricao) + "</p>" + (x.link ? '<p class="small" style="margin:10px 0 0;word-break:break-all">🔗 ' + (lk ? '<a class="linkbtn" href="' + esc(lk) + '" target="_blank" rel="noopener noreferrer nofollow">' + esc(x.link) + "</a>" : esc(x.link)) + "</p>" : "") +
+      ((x.ficheiros || []).length ? '<div class="btns" style="margin-top:10px">' + x.ficheiros.map(function (p, i) { return '<button class="btn btn--line btn--sm" type="button" data-act="dn-fich" data-path="' + esc(p) + '">📎 Prova ' + (i + 1) + "</button>"; }).join("") + "</div>" : "") +
+      '<p class="small" style="margin:10px 0 0">' + (x.anonimo ? "Denúncia anónima." : "Denunciante: " + esc(x.nome || "—") + (x.email ? ' · <a class="linkbtn" href="mailto:' + esc(x.email) + "?subject=" + encodeURIComponent("AACPD — denúncia " + x.protocolo) + '">' + esc(x.email) + "</a>" : "") + (x.telefone ? ' · <a class="linkbtn" target="_blank" rel="noopener" href="' + esc(wa(x.telefone)) + '">' + esc(x.telefone) + "</a>" : "")) + "</p></div>" +
+      '<form class="form" id="fDn" style="margin-top:14px"><label>Estado / veredicto<select name="estado">' + Object.keys(DN_EST).map(function (k) { return '<option value="' + k + '"' + (x.estado === k ? " selected" : "") + ">" + DN_EST[k][0] + "</option>"; }).join("") + '</select></label>' +
+      '<label>Resposta ao denunciante <span class="hint">Aparece quando consulta com o protocolo e o código.</span><textarea name="conclusao" maxlength="4000">' + esc(x.conclusao) + "</textarea></label>" +
+      '<label class="check"><input type="checkbox" name="publicar"' + (x.publicar ? " checked" : "") + '> Publicar na lista de verificações (só para falso, enganador, verdadeiro ou sem fundamento)</label>' +
+      '<label>Resumo público <span class="hint">O que se verificou e quais as fontes. Não inclua dados do denunciante.</span><textarea name="resumo_publico" maxlength="4000">' + esc(x.resumo_publico) + "</textarea></label>" +
+      '<label>Nota interna <span class="hint">Só a administração vê.</span><textarea name="nota_interna" maxlength="4000" style="min-height:70px">' + esc(x.nota_interna) + "</textarea></label>" +
+      '<div class="btns"><button class="btn" type="submit">Guardar</button><button class="btn btn--line" type="button" data-act="dn-apagar" data-id="' + x.id + '">Apagar</button></div></form>');
+    document.getElementById("fDn").addEventListener("submit", function (e) { e.preventDefault(); var d = new FormData(this), o = { estado: d.get("estado"), conclusao: String(d.get("conclusao") || "").trim(), resumo_publico: String(d.get("resumo_publico") || "").trim(), nota_interna: String(d.get("nota_interna") || "").trim(), publicar: !!d.get("publicar") };
+      if (o.publicar && ["falso", "enganador", "verdadeiro", "sem_fundamento"].indexOf(o.estado) < 0) { toast("Para publicar, escolha um veredicto: falso, enganador, verdadeiro ou sem fundamento.", true); return; }
+      if (o.publicar && !o.resumo_publico) { toast("Escreva o resumo público antes de publicar.", true); return; }
+      fechar(); acao(async function () { ok(await sb.from("denuncias").update(o).eq("id", id)); }, "Denúncia actualizada", ["adm:", "pub:verif"]).catch(function () {}); });
   }
   function admDefinicoes() {
     var A = need("adm:admins", function () { return sb.rpc("admin_lista_admins").then(ok); });
@@ -512,6 +616,12 @@
       acao(async function () { var ins = ok(await sb.from("quotas").insert({ membro_id: id, referencia: "M-" + Date.now().toString(36).toUpperCase(), plano: pp.nome, descricao: "Quota " + pp.nome + " (registo manual)", valor: pp.valor || 0, meses: pp.periodo === "mensal" ? 1 : 12 }).select().single()); fechar(); setTimeout(function () { var b = document.createElement("button"); b.dataset.act = "q-confirmar"; b.dataset.id = ins.id; b.dataset.nome = mm.nome; b.dataset.valor = pp.valor || 0; document.body.appendChild(b); b.click(); b.remove(); }, 200); }, null, ["adm:"]).catch(function () {}); return; }
     if (a === "q-anular") { if (!confirm("Anular esta quota?")) return; acao(async function () { ok(await sb.from("quotas").update({ estado: "anulado" }).eq("id", id)); }, "Quota anulada", ["adm:"]).catch(function () {}); return; }
     if (a === "ver-comp") { try { var u = ok(await sb.storage.from("comprovativos").createSignedUrl(t.dataset.path, 600)); window.open(u.signedUrl, "_blank", "noopener"); } catch (e) { toast(traduz(e).message, true); } return; }
+    if (a === "dn-ver") return editarDenuncia(id);
+    if (a === "dn-fich") { try { var su = ok(await sb.storage.from("denuncias").createSignedUrl(t.dataset.path, 600)); window.open(su.signedUrl, "_blank", "noopener"); } catch (e) { toast(traduz(e).message, true); } return; }
+    if (a === "dn-apagar") { if (!confirm("Apagar esta denúncia definitivamente?")) return; fechar(); acao(async function () { ok(await sb.from("denuncias").delete().eq("id", id)); }, "Denúncia apagada", ["adm:", "pub:verif"]).catch(function () {}); return; }
+    if (a === "dn-copiar") { try { await navigator.clipboard.writeText(t.dataset.txt); toast("Copiado"); } catch (e) { prompt("Copie estes dados:", t.dataset.txt); } return; }
+    if (a === "dn-ir") { var fo = document.getElementById("dnForm"); fo.scrollIntoView({ behavior: "smooth", block: "start" }); var i0 = fo.querySelector("input"); if (i0) setTimeout(function () { i0.focus({ preventScroll: true }); }, 400); return; }
+    if (a === "dn-nova") { render(); window.scrollTo(0, 0); return; }
     if (a === "n-editar") return editarNoticia(id);
     if (a === "b-editar") return editarBeneficio(id);
     if (a === "d-editar") return editarDireccao(id);
@@ -520,6 +630,7 @@
     if (a === "msg-apagar") { if (!confirm("Apagar esta mensagem?")) return; acao(async function () { ok(await sb.from("mensagens").delete().eq("id", id)); }, "Mensagem apagada", ["adm:"]).catch(function () {}); return; }
     if (a === "adm-remover") { if (!confirm("Retirar o acesso de administrador a " + t.dataset.email + "?")) return; acao(async function () { ok(await sb.rpc("admin_definir_papel", { p_email: t.dataset.email, p_papel: "membro" })); }, "Acesso retirado", ["adm:admins"]).catch(function () {}); return; }
     if (a === "csv-membros") { var M = C["adm:membros"] || []; csv([["Número", "Nome", "Email", "Telefone", "Tipo", "Plano", "Área", "Província", "BI/NIF", "Estado", "Quota até", "Pedido em"]].concat(M.map(function (m) { return [m.numero, m.nome, m.email, m.telefone, m.tipo, (plano(m.plano) || {}).nome || m.plano, m.area, m.provincia, m.documento, m.estado, m.quota_ate, curta(m.criado_em)]; })), "membros-aacpd.csv"); return; }
+    if (a === "csv-denuncias") { var DN = C["adm:denuncias"] || []; csv([["Protocolo", "Data", "Estado", "Categoria", "Plataforma", "Título", "Descrição", "Link", "Vista em", "Provas", "Anónima", "Nome", "Email", "Telefone", "Resposta", "Público", "Resumo público"]].concat(DN.map(function (x) { return [x.protocolo, curta(x.criado_em), (DN_EST[x.estado] || [x.estado])[0], x.categoria, x.plataforma, x.titulo, x.descricao, x.link, x.visto_em, (x.ficheiros || []).length, x.anonimo ? "sim" : "não", x.nome, x.email, x.telefone, x.conclusao, x.publicar ? "sim" : "não", x.resumo_publico]; })), "denuncias-aacpd.csv"); return; }
     if (a === "csv-quotas") { var Q = C["adm:quotas"] || []; csv([["Data", "Membro", "Número", "Email", "Referência", "Descrição", "Valor (Kz)", "Estado", "Método", "Pago em"]].concat(Q.map(function (x) { return [curta(x.criado_em), x.membro, x.numero, x.email, x.referencia, x.descricao, x.valor, x.estado, x.metodo, curta(x.pago_em)]; })), "quotas-aacpd.csv"); return; }
   });
 
@@ -556,6 +667,7 @@
       case "membros": pgMembros(q); break;
       case "verificar": pgVerificar(seg[1] ? decodeURIComponent(seg[1]) : ""); break;
       case "contacto": pgContacto(); break;
+      case "denunciar": if (seg[1] === "acompanhar") pgAcompanhar(q); else pgDenunciar(); break;
       case "adesao": pgAdesao(q); break;
       case "conta": pgConta(q); break;
       case "admin": pgAdmin(seg[1] || "", q); break;

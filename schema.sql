@@ -366,3 +366,78 @@ on conflict (slug) do nothing;
 
 -- Tornar-se administrador (correr depois de criar a conta no site):
 --   update perfis set papel = 'admin' where id = (select id from auth.users where email = 'o-seu-email@exemplo.com');
+
+-- =========================================================
+-- Denúncias de fake news
+-- =========================================================
+create sequence if not exists denuncias_seq start 1;
+create table if not exists denuncias (
+  id uuid primary key default gen_random_uuid(),
+  protocolo text not null unique,
+  codigo text not null,
+  link text not null default '' check (char_length(link) <= 600),
+  plataforma text not null default '',
+  categoria text not null,
+  titulo text not null check (char_length(titulo) between 3 and 200),
+  descricao text not null check (char_length(descricao) between 10 and 4000),
+  visto_em date,
+  ficheiros text[] not null default '{}',
+  anonimo boolean not null default true,
+  nome text not null default '',
+  email text not null default '',
+  telefone text not null default '',
+  estado text not null default 'recebida' check (estado in ('recebida', 'em_analise', 'falso', 'enganador', 'verdadeiro', 'sem_fundamento', 'encaminhada')),
+  conclusao text not null default '',
+  nota_interna text not null default '',
+  publicar boolean not null default false,
+  resumo_publico text not null default '',
+  criado_em timestamptz not null default now(),
+  actualizado_em timestamptz not null default now()
+);
+create index if not exists denuncias_estado_idx on denuncias (estado, criado_em desc);
+alter table denuncias enable row level security;
+create policy denuncias_admin on denuncias for all using (is_admin()) with check (is_admin());
+revoke all on denuncias from anon, authenticated;
+grant select, update, delete on denuncias to authenticated;
+
+create or replace function criar_denuncia(p_link text, p_plataforma text, p_categoria text, p_titulo text, p_descricao text, p_visto_em date,
+  p_ficheiros text[], p_anonimo boolean, p_nome text, p_email text, p_telefone text) returns json
+language plpgsql security definer set search_path = public as $$
+declare v_prot text; v_cod text;
+begin
+  if coalesce(char_length(trim(p_titulo)), 0) < 3 or coalesce(char_length(trim(p_descricao)), 0) < 10 then raise exception 'Indique um título e uma descrição.'; end if;
+  if coalesce(array_length(p_ficheiros, 1), 0) > 5 then raise exception 'Máximo de 5 ficheiros.'; end if;
+  if exists (select 1 from unnest(coalesce(p_ficheiros, '{}')) f where f not like 'novas/%') then raise exception 'Ficheiros inválidos.'; end if;
+  if (select count(*) from denuncias where criado_em > now() - interval '1 minute') > 20 then raise exception 'Muitas denúncias em pouco tempo. Tente daqui a um minuto.'; end if;
+  v_prot := 'DN-' || to_char(now(), 'YYYY') || '-' || lpad(nextval('denuncias_seq')::text, 4, '0');
+  v_cod := upper(substr(md5(random()::text || clock_timestamp()::text), 1, 6));
+  insert into denuncias (protocolo, codigo, link, plataforma, categoria, titulo, descricao, visto_em, ficheiros, anonimo, nome, email, telefone)
+  values (v_prot, v_cod, left(coalesce(p_link, ''), 600), left(coalesce(p_plataforma, ''), 60), left(coalesce(p_categoria, 'Outro'), 80), left(trim(p_titulo), 200), left(trim(p_descricao), 4000), p_visto_em,
+          coalesce(p_ficheiros, '{}'), coalesce(p_anonimo, true),
+          case when coalesce(p_anonimo, true) then '' else left(coalesce(p_nome, ''), 120) end,
+          case when coalesce(p_anonimo, true) then '' else left(coalesce(p_email, ''), 160) end,
+          case when coalesce(p_anonimo, true) then '' else left(coalesce(p_telefone, ''), 40) end);
+  return json_build_object('protocolo', v_prot, 'codigo', v_cod);
+end $$;
+
+create or replace function estado_denuncia(p_protocolo text, p_codigo text) returns json
+language sql stable security definer set search_path = public as $$
+  select coalesce((select json_build_object('ok', true, 'protocolo', protocolo, 'titulo', titulo, 'estado', estado, 'conclusao', conclusao, 'criado_em', criado_em, 'actualizado_em', actualizado_em)
+    from denuncias where upper(protocolo) = upper(trim(p_protocolo)) and upper(codigo) = upper(trim(p_codigo))), json_build_object('ok', false));
+$$;
+
+create or replace view v_verificacoes as
+  select protocolo, categoria, plataforma, titulo, resumo_publico, estado, actualizado_em from denuncias
+  where publicar and estado in ('falso', 'enganador', 'verdadeiro', 'sem_fundamento');
+grant select on v_verificacoes to anon, authenticated;
+grant execute on function criar_denuncia(text, text, text, text, text, date, text[], boolean, text, text, text), estado_denuncia(text, text) to anon, authenticated;
+
+create or replace function denuncias_toque() returns trigger language plpgsql as $$ begin new.actualizado_em := now(); return new; end $$;
+create trigger t_denuncias_toque before update on denuncias for each row execute function denuncias_toque();
+revoke execute on function denuncias_toque() from public, anon, authenticated;
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('denuncias', 'denuncias', false, 5242880, array['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'])
+on conflict (id) do nothing;
+create policy denuncias_enviar on storage.objects for insert to anon, authenticated with check (bucket_id = 'denuncias' and (storage.foldername(name))[1] = 'novas');
+create policy denuncias_ler on storage.objects for select to authenticated using (bucket_id = 'denuncias' and is_admin());

@@ -337,3 +337,24 @@ body.busy { cursor: progress; }
 @media (min-width: 901px) { .top__tools { order: 3; } .nav { order: 2; margin-left: auto; } .top__in > .brand { order: 1; } }
 @media (max-width: 420px) { .tema-btn span { display: none; } .tema-btn { padding: 0 10px; } }
 @media (max-width: 900px) { .top__tools { margin-left: auto; } }
+/* denúncia de fake news */
+.dn-hero { color: #d5dde2; background: radial-gradient(800px 420px at 90% 0%, rgba(215,25,32,.4), transparent 60%), radial-gradient(600px 360px at 0% 100%, rgba(245,180,0,.18), transparent 60%), #0b1418; padding: 56px 0 48px; }
+.dn-hero h1 { color: #fff; }
+.dn-hero p { max-width: 640px; font-size: 1.08rem; }
+.dn-hero b { color: #fff; }
+.dn-grid { grid-template-columns: 1.4fr 1fr; align-items: start; }
+.dn-passos, .dn-dicas { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+.dn-cod { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 6px 0 12px; }
+.dn-cod div { background: var(--soft); border: 1px dashed var(--line); border-radius: 12px; padding: 14px; text-align: center; }
+.dn-cod span { display: block; font-size: .76rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+.dn-cod b { font-size: 1.5rem; color: var(--ink); letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+.verifs { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.verif { background: var(--card); border: 1px solid var(--line); border-left: 5px solid var(--muted); border-radius: 14px; padding: 18px; }
+.verif--falso { border-left-color: var(--red); }
+.verif--enganador { border-left-color: var(--warn); }
+.verif--verdadeiro { border-left-color: var(--ok); }
+.verif__top { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
+.verif h3 { font-size: 1.05rem; margin: 0 0 6px; }
+@media (max-width: 860px) { .dn-grid { grid-template-columns: 1fr; } }
+@media (max-width: 480px) { .dn-cod { grid-template-columns: 1fr; } }
+[hidden] { display: none !important; }
