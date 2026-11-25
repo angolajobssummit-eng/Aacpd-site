@@ -144,7 +144,7 @@
       (S.defs.planos.length ? '<section class="sec sec--soft"><div class="wrap"><div class="sec__head reveal"><div><div class="kicker">Quotas</div><h2>Planos de adesão</h2></div></div><div class="grid4">' +
         S.defs.planos.map(function (p, i) { return '<div class="card plan reveal' + (i === 1 ? " plan--top" : "") + '" style="--d:' + i * 90 + 'ms">' + (i === 1 ? '<span class="badge badge--red" style="align-self:flex-start">Mais escolhido</span>' : "") + "<h3>" + esc(p.nome) + '</h3><p class="small">' + esc(p.descricao || "") + "</p>" + precoPlano(p) + '<a class="btn btn--sm" href="#/adesao?plano=' + esc(p.id) + '" style="margin-top:12px">Escolher</a></div>'; }).join("") + "</div></div></section>" : "") +
       '<section class="sec"><div class="wrap"><div class="sec__head reveal"><div><div class="kicker">Órgãos sociais</div><h2>Direcção</h2></div><a class="btn btn--line btn--sm" href="#/sobre">Sobre a AACPD</a></div>' +
-        (Dd === undefined ? carregando() : falhou(Dd) || '<div class="team">' + D.slice(0, 5).map(function (d, i) { return pessoa(d).replace('<figure class="member"', '<figure class="member reveal" style="--d:' + i * 80 + 'ms"'); }).join("") + "</div>") + "</div></section>" +
+        (Dd === undefined ? carregando() : falhou(Dd) || '<div class="team">' + D.map(function (d, i) { return pessoa(d).replace('<figure class="member"', '<figure class="member reveal" style="--d:' + i * 80 + 'ms"'); }).join("") + "</div>") + "</div></section>" +
       '<section class="cta"><div class="wrap cta__in reveal"><div><h2>Faça parte da AACPD</h2><p>Adesão online em 3 minutos. Cartão de membro digital no telemóvel.</p></div><a class="btn btn--white" href="#/adesao">Aderir agora</a></div></section>';
     animar();
   }
