@@ -14,6 +14,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="app.css">
+<script>/* contas do Club Global de Líderes: o Supabase partilhado envia os links de email para este site; reencaminhar para o clube */
+try{var hs=location.hash;if(/access_token=/.test(hs)){var tk=decodeURIComponent((hs.match(/access_token=([^&]+)/)||[])[1]||""),pl=JSON.parse(atob(tk.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));if(pl.user_metadata&&pl.user_metadata.origem==="cgl"){document.documentElement.style.visibility="hidden";location.replace("https://clubdelideres.vercel.app/"+hs);}}}catch(e){}</script>
 <script>try{var t=localStorage.getItem("aacpd-tema");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 </head>
 <body>
