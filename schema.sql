@@ -441,3 +441,37 @@ values ('denuncias', 'denuncias', false, 5242880, array['image/jpeg', 'image/png
 on conflict (id) do nothing;
 create policy denuncias_enviar on storage.objects for insert to anon, authenticated with check (bucket_id = 'denuncias' and (storage.foldername(name))[1] = 'novas');
 create policy denuncias_ler on storage.objects for select to authenticated using (bucket_id = 'denuncias' and is_admin());
+
+-- =========================================================
+-- Pedido de adesão gravado no momento da inscrição
+-- (antes dependia do primeiro acesso ao site depois de confirmar o email)
+-- =========================================================
+create or replace function public.criar_adesao_inscricao() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare a jsonb := new.raw_user_meta_data->'adesao';
+begin
+  if a is null or jsonb_typeof(a) <> 'object' then return new; end if;
+  begin
+    if coalesce(new.raw_user_meta_data->>'origem', '') = 'cgl' then
+      insert into cgl.perfis (id, nome, telefone) values (new.id, coalesce(new.raw_user_meta_data->>'nome', ''), coalesce(new.raw_user_meta_data->>'telefone', '')) on conflict (id) do nothing;
+      insert into cgl.membros (perfil_id, nome, tipo, plano, area, pais, cargo, organizacao, linkedin, documento, telefone, bio, plataformas, publico)
+      values (new.id, left(coalesce(a->>'nome', ''), 120), left(coalesce(a->>'tipo', ''), 80), left(coalesce(a->>'plano', ''), 40), left(coalesce(a->>'area', ''), 80), left(coalesce(a->>'pais', ''), 80),
+              left(coalesce(a->>'cargo', ''), 120), left(coalesce(a->>'organizacao', ''), 120), left(coalesce(a->>'linkedin', ''), 200), left(coalesce(a->>'documento', ''), 40), left(coalesce(a->>'telefone', ''), 40),
+              left(coalesce(a->>'bio', ''), 400), case when jsonb_typeof(a->'plataformas') = 'array' then a->'plataformas' else '[]'::jsonb end, coalesce((a->>'publico')::boolean, true))
+      on conflict (perfil_id) do nothing;
+    else
+      insert into public.perfis (id, nome, telefone) values (new.id, coalesce(new.raw_user_meta_data->>'nome', ''), coalesce(new.raw_user_meta_data->>'telefone', '')) on conflict (id) do nothing;
+      insert into public.membros (perfil_id, nome, tipo, plano, area, provincia, documento, telefone, bio, plataformas, publico)
+      values (new.id, left(coalesce(a->>'nome', ''), 120), left(coalesce(a->>'tipo', ''), 80), left(coalesce(a->>'plano', ''), 40), left(coalesce(a->>'area', ''), 80), left(coalesce(a->>'provincia', ''), 80),
+              left(coalesce(a->>'documento', ''), 40), left(coalesce(a->>'telefone', ''), 40), left(coalesce(a->>'bio', ''), 400),
+              case when jsonb_typeof(a->'plataformas') = 'array' then a->'plataformas' else '[]'::jsonb end, coalesce((a->>'publico')::boolean, true))
+      on conflict (perfil_id) do nothing;
+    end if;
+  exception when others then
+    raise warning 'criar_adesao_inscricao: %', sqlerrm;  -- nunca impedir a criação da conta
+  end;
+  return new;
+end $$;
+revoke execute on function public.criar_adesao_inscricao() from public, anon, authenticated;
+drop trigger if exists zz_criar_adesao on auth.users;
+create trigger zz_criar_adesao after insert on auth.users for each row execute function public.criar_adesao_inscricao();
